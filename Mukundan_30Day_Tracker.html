@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mukundan's 30-Day Diet & Fitness Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:      #0F6E56;
+  --teal-m:    #1D9E75;
+  --teal-l:    #E1F5EE;
+  --blue:      #185FA5;
+  --blue-l:    #E6F1FB;
+  --amber:     #BA7517;
+  --amber-l:   #FAEEDA;
+  --pink:      #993556;
+  --pink-l:    #FBEAF0;
+  --green:     #3B6D11;
+  --green-l:   #EAF3DE;
+  --gray:      #5F5E5A;
+  --gray-l:    #F5F4F0;
+  --gray-m:    #D3D1C7;
+  --black:     #1E1D1B;
+  --white:     #FFFFFF;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F5F4F0;
+  color: var(--black);
+  min-height: 100vh;
+}
+
+/* ── TOP HEADER ─────────────────────────────────────── */
+.site-header {
+  background: var(--teal);
+  padding: 28px 32px 24px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.site-header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 30px; color: #fff; line-height: 1.1;
+}
+.site-header h1 span { font-style: italic; color: #9FE1CB; }
+.header-stats { display:flex; gap:12px; flex-wrap:wrap; }
+.hstat {
+  background: rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 8px 16px;
+  text-align: center;
+}
+.hstat-val { font-size: 18px; font-weight: 600; color: #fff; }
+.hstat-lbl { font-size: 11px; color: #9FE1CB; }
+
+/* ── MONTH NAV ──────────────────────────────────────── */
+.month-strip {
+  background: #fff;
+  border-bottom: 1px solid var(--gray-m);
+  padding: 12px 32px;
+  display: flex; align-items: center; gap: 8px;
+  overflow-x: auto;
+}
+.month-strip h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px; color: var(--gray); margin-right: 8px; white-space: nowrap;
+}
+.day-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid var(--gray-m);
+  background: #fff; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.18s; flex-shrink: 0;
+  color: var(--black);
+}
+.day-btn:hover { border-color: var(--teal); color: var(--teal); }
+.day-btn.active {
+  background: var(--teal); border-color: var(--teal);
+  color: #fff; font-weight: 600;
+}
+.day-btn.gym-a { border-color: var(--blue); }
+.day-btn.gym-b { border-color: var(--teal-m); }
+.day-btn.gym-c { border-color: var(--green); }
+.day-btn.gym-d { border-color: var(--pink); }
+.day-btn.rest   { border-color: var(--gray-m); }
+
+/* ── MAIN LAYOUT ────────────────────────────────────── */
+.main { display: grid; grid-template-columns: 1fr 360px; gap: 20px; padding: 24px 32px; max-width: 1280px; }
+@media(max-width:900px){ .main{ grid-template-columns:1fr; padding:16px; } }
+
+/* ── DAY CARD ───────────────────────────────────────── */
+.day-card {
+  background: #fff; border-radius: 18px;
+  overflow: hidden; border: 1px solid var(--gray-m);
+}
+.day-card-header {
+  padding: 18px 22px 14px;
+  display: flex; align-items: center; gap: 16px;
+  border-bottom: 1px solid var(--gray-m);
+}
+.day-number {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.day-number .num  { font-size: 22px; font-weight: 700; color: #fff; line-height: 1; }
+.day-number .lbl  { font-size: 9px;  font-weight: 500; color: rgba(255,255,255,0.75); }
+.day-title { flex: 1; }
+.day-title h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
+.day-title p  { font-size: 12px; color: var(--gray); margin-top: 2px; }
+.week-badge {
+  padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.progress-bar-wrap { height: 4px; background: var(--gray-m); }
+.progress-bar      { height: 4px; background: var(--teal); transition: width 0.4s; }
+
+/* ── SECTION TABS ───────────────────────────────────── */
+.section-tabs {
+  display: flex; border-bottom: 1px solid var(--gray-m);
+}
+.tab {
+  flex: 1; padding: 12px; text-align: center;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  color: var(--gray); border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+.tab-content { display: none; padding: 20px 22px; }
+.tab-content.active { display: block; }
+
+/* ── MEAL CARDS ─────────────────────────────────────── */
+.meal-block { margin-bottom: 16px; }
+.meal-block:last-child { margin-bottom: 0; }
+.meal-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.meal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.meal-title-text { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.meal-time-badge {
+  margin-left: auto; font-size: 10px; color: var(--gray);
+  background: var(--gray-l); padding: 2px 8px; border-radius: 20px;
+}
+.meal-card-inner {
+  border-radius: 12px; overflow: hidden; border: 1px solid var(--gray-m);
+  display: flex;
+}
+.meal-img {
+  width: 90px; height: 90px; object-fit: cover; flex-shrink: 0;
+  background: var(--gray-l);
+}
+.meal-img-placeholder {
+  width: 90px; height: 90px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.meal-info { flex: 1; padding: 10px 12px; }
+.meal-main-food { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.meal-sub-food  { font-size: 12px; color: var(--gray); margin-bottom: 8px; line-height: 1.4; }
+.meal-macros    { display: flex; gap: 8px; flex-wrap: wrap; }
+.macro-pill {
+  font-size: 11px; padding: 2px 8px; border-radius: 20px;
+  font-weight: 500;
+}
+.meal-checkbox-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 8px;
+}
+.check-wrap { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 12px; color: var(--gray); }
+.check-wrap input[type=checkbox] {
+  width: 16px; height: 16px; border-radius: 4px; cursor: pointer;
+  accent-color: var(--teal);
+}
+.check-wrap span.done { text-decoration: line-through; color: var(--teal); }
+
+/* Alternatives */
+.alts-section { margin-top: 8px; }
+.alts-label { font-size: 10px; font-weight: 600; color: var(--gray); letter-spacing: 0.05em; margin-bottom: 5px; }
+.alt-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.alt-chip {
+  font-size: 11px; padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--gray-m); color: var(--gray);
+  cursor: pointer; transition: all 0.15s;
+}
+.alt-chip:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-l); }
+
+/* ── WATER TRACKER ──────────────────────────────────── */
+.water-section {
+  background: var(--blue-l); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.water-label { font-size: 12px; font-weight: 600; color: var(--blue); white-space: nowrap; }
+.water-drops { display: flex; gap: 6px; flex-wrap: wrap; }
+.drop {
+  width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  border: 2px solid var(--blue); background: #fff; cursor: pointer; transition: all 0.15s;
+}
+.drop.filled { background: var(--blue); }
+.water-ml { font-size: 10px; color: var(--blue); margin-left: auto; white-space: nowrap; }
+
+/* ── NOTES ──────────────────────────────────────────── */
+.notes-section { margin-top: 4px; }
+.notes-label { font-size: 11px; font-weight: 600; color: var(--gray); margin-bottom: 5px; }
+.notes-input {
+  width: 100%; border: 1px solid var(--gray-m); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: var(--black); background: var(--gray-l); resize: none; outline: none;
+}
+.notes-input:focus { border-color: var(--teal); background: #fff; }
+
+/* ── EXERCISE PANEL ─────────────────────────────────── */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+.ex-card {
+  background: #fff; border-radius: 18px;
+  overflow: hidden; border: 1px solid var(--gray-m);
+}
+.ex-card-header {
+  padding: 14px 18px 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.ex-type-badge {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.ex-header-text h3 { font-size: 15px; font-weight: 600; }
+.ex-header-text p  { font-size: 11px; color: var(--gray); }
+
+.ex-img {
+  width: 100%; height: 130px; object-fit: cover; object-position: center;
+}
+.ex-img-placeholder {
+  width: 100%; height: 80px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500; color: #fff;
+}
+
+.ex-list { padding: 12px 18px 16px; }
+.ex-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--gray-l);
+}
+.ex-item:last-child { border-bottom: none; }
+.ex-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.ex-text { flex: 1; }
+.ex-name { font-size: 13px; font-weight: 500; }
+.ex-sets { font-size: 11px; color: var(--gray); }
+.ex-checks { display: flex; gap: 4px; }
+.ex-check {
+  width: 18px; height: 18px; border-radius: 4px;
+  border: 1.5px solid var(--gray-m); background: #fff;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.ex-check.done { background: var(--teal-m); border-color: var(--teal-m); }
+.ex-check.done::after {
+  content: '';
+  width: 8px; height: 5px;
+  border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translateY(-1px);
+}
+
+/* ── REST DAY ───────────────────────────────────────── */
+.rest-card {
+  background: var(--gray-l); border-radius: 12px; padding: 16px; text-align: center;
+}
+.rest-card h3 { font-size: 16px; font-weight: 600; color: var(--gray); margin-bottom: 6px; }
+.rest-card p  { font-size: 13px; color: var(--gray); }
+
+/* ── MINI CALENDAR ──────────────────────────────────── */
+.mini-cal {
+  background: #fff; border-radius: 18px;
+  border: 1px solid var(--gray-m); padding: 16px 18px;
+}
+.mini-cal h3 { font-family: 'DM Serif Display', serif; font-size: 16px; margin-bottom: 12px; }
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+}
+.cal-day-lbl { font-size: 10px; font-weight: 600; color: var(--gray); text-align: center; padding-bottom: 4px; }
+.cal-day {
+  aspect-ratio: 1; border-radius: 6px; font-size: 11px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; position: relative;
+}
+.cal-day:hover { background: var(--teal-l); }
+.cal-day.cur   { background: var(--teal); color: #fff; font-weight: 700; }
+.cal-day.gym-a { background: #E6F1FB; color: var(--blue); }
+.cal-day.gym-b { background: var(--teal-l); color: var(--teal); }
+.cal-day.gym-c { background: var(--green-l); color: var(--green); }
+.cal-day.gym-d { background: var(--pink-l); color: var(--pink); }
+.cal-day.rest  { color: var(--gray); }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.cal-leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--gray); }
+.cal-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* ── OVERALL PROGRESS ───────────────────────────────── */
+.progress-card {
+  background: #fff; border-radius: 18px;
+  border: 1px solid var(--gray-m); padding: 16px 18px;
+}
+.progress-card h3 { font-family: 'DM Serif Display', serif; font-size: 16px; margin-bottom: 12px; }
+.prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.prog-lbl { font-size: 12px; color: var(--gray); width: 80px; flex-shrink: 0; }
+.prog-track { flex: 1; height: 8px; background: var(--gray-l); border-radius: 4px; overflow: hidden; }
+.prog-fill  { height: 100%; border-radius: 4px; transition: width 0.5s; }
+.prog-pct   { font-size: 12px; font-weight: 600; width: 32px; text-align: right; }
+
+/* ── FOOD ALTERNATIVES PANEL ────────────────────────── */
+.alts-card {
+  background: #fff; border-radius: 18px;
+  border: 1px solid var(--gray-m); padding: 16px 18px;
+}
+.alts-card h3 { font-family: 'DM Serif Display', serif; font-size: 16px; margin-bottom: 4px; }
+.alts-card > p { font-size: 12px; color: var(--gray); margin-bottom: 12px; }
+.alt-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gray-l); }
+.alt-row:last-child { border-bottom: none; }
+.alt-icon { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--gray-l); }
+.alt-info .name { font-size: 13px; font-weight: 500; }
+.alt-info .macro { font-size: 11px; color: var(--gray); }
+.alt-badge { margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div>
+    <h1>Mukundan's<br><span>30-Day Tracker</span></h1>
+    <p style="color:#9FE1CB;font-size:12px;margin-top:4px;">Diet · Exercise · Daily check-in</p>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-val">2,400</div><div class="hstat-lbl">kcal / day</div></div>
+    <div class="hstat"><div class="hstat-val">130g</div><div class="hstat-lbl">protein</div></div>
+    <div class="hstat"><div class="hstat-val">4×</div><div class="hstat-lbl">gym / week</div></div>
+    <div class="hstat"><div class="hstat-val">£5–6</div><div class="hstat-lbl">budget</div></div>
+  </div>
+</header>
+
+<div style="background:#fff;border-bottom:1px solid var(--gray-m);padding:10px 32px 0;display:flex;gap:0;overflow-x:auto;" class="month-strip">
+  <h2 style="margin-right:12px;align-self:center;">Day</h2>
+  <div id="day-buttons" style="display:flex;gap:6px;flex-wrap:nowrap;"></div>
+</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="overall-progress" style="width:3.3%"></div></div>
+
+<div class="main" id="main-content">
+  <div>
+    <div class="day-card" id="day-card"></div>
+  </div>
+  <div class="sidebar" id="sidebar"></div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const DAYS_DATA = [
+  { b:"Scrambled eggs + oats + banana + milk",        lp:"Chicken breast",    dp:"Canned tuna" },
+  { b:"Boiled eggs + oat porridge + honey",           lp:"Salmon fillet",     dp:"Chicken thighs" },
+  { b:"Omelette (3 eggs) + wholegrain toast + yoghurt",lp:"Mackerel fillet",  dp:"Turkey mince" },
+  { b:"Scrambled eggs + oats + apple + milk",         lp:"Turkey mince",      dp:"Salmon fillet" },
+  { b:"Poached eggs + toast + banana",                lp:"Canned tuna",       dp:"Chicken breast" },
+  { b:"Greek yoghurt + granola + banana + milk",      lp:"Chicken thighs",    dp:"Mackerel fillet" },
+  { b:"Egg fried rice + boiled eggs",                 lp:"Sardines (canned)", dp:"Chicken breast" },
+  { b:"Scrambled eggs + oats + banana + milk",        lp:"Cod fillet",        dp:"Canned tuna" },
+  { b:"Boiled eggs + oat porridge + apple",           lp:"Chicken breast",    dp:"Salmon fillet" },
+  { b:"Omelette + toast + yoghurt",                   lp:"Lamb mince",        dp:"Chicken thighs" },
+  { b:"Scrambled eggs + oats + banana + milk",        lp:"Canned tuna",       dp:"Turkey mince" },
+  { b:"Poached eggs + toast + banana + yoghurt",      lp:"Salmon fillet",     dp:"Chicken breast" },
+  { b:"Greek yoghurt + granola + banana",             lp:"Mackerel fillet",   dp:"Canned tuna" },
+  { b:"Scrambled eggs + oats + honey + milk",         lp:"Chicken thighs",    dp:"Sardines (canned)" },
+  { b:"Boiled eggs + oat porridge + banana",          lp:"Turkey mince",      dp:"Chicken breast" },
+  { b:"Omelette + toast + yoghurt",                   lp:"Cod fillet",        dp:"Lamb mince" },
+  { b:"Scrambled eggs + oats + apple + milk",         lp:"Chicken breast",    dp:"Mackerel fillet" },
+  { b:"Poached eggs + toast + banana",                lp:"Canned tuna",       dp:"Chicken thighs" },
+  { b:"Greek yoghurt + granola + honey + milk",       lp:"Salmon fillet",     dp:"Turkey mince" },
+  { b:"Scrambled eggs + oats + banana + milk",        lp:"Chicken thighs",    dp:"Canned tuna" },
+  { b:"Boiled eggs + oat porridge + apple",           lp:"Mackerel fillet",   dp:"Chicken breast" },
+  { b:"Omelette + toast + yoghurt",                   lp:"Turkey mince",      dp:"Salmon fillet" },
+  { b:"Scrambled eggs + oats + banana + milk",        lp:"Sardines (canned)", dp:"Chicken thighs" },
+  { b:"Poached eggs + toast + banana + yoghurt",      lp:"Chicken breast",    dp:"Mackerel fillet" },
+  { b:"Greek yoghurt + granola + banana + milk",      lp:"Lamb mince",        dp:"Canned tuna" },
+  { b:"Scrambled eggs + oats + honey + milk",         lp:"Cod fillet",        dp:"Chicken breast" },
+  { b:"Boiled eggs + oat porridge + apple",           lp:"Canned tuna",       dp:"Turkey mince" },
+  { b:"Omelette + toast + yoghurt",                   lp:"Chicken thighs",    dp:"Sardines (canned)" },
+  { b:"Scrambled eggs + oats + banana + milk",        lp:"Salmon fillet",     dp:"Chicken breast" },
+  { b:"Greek yoghurt + granola + banana",             lp:"Mackerel fillet",   dp:"Lamb mince" },
+];
+
+const RICE_SIDE = {
+  "Chicken breast":    "Basmati rice 100g · frozen mixed veg",
+  "Chicken thighs":   "Basmati rice 100g · broccoli · soy sauce",
+  "Salmon fillet":    "Basmati rice 100g · spinach · lemon",
+  "Mackerel fillet":  "Basmati rice 100g · green beans · olive oil",
+  "Turkey mince":     "Basmati rice 100g · peppers · tomatoes",
+  "Canned tuna":      "Basmati rice 100g · sweetcorn · cucumber",
+  "Sardines (canned)":"Basmati rice 100g · tomatoes · spinach",
+  "Lamb mince":       "Basmati rice 100g · peas · onion",
+  "Cod fillet":       "Basmati rice 100g · broccoli · garlic",
+};
+
+const FOOD_ALTS = {
+  "Chicken breast":    ["Chicken thighs","Turkey breast","Cod fillet","Tofu (firm)"],
+  "Chicken thighs":   ["Chicken breast","Duck breast","Turkey mince","Paneer"],
+  "Salmon fillet":    ["Trout fillet","Mackerel","Tuna steak","Sardines"],
+  "Mackerel fillet":  ["Sardines","Herring","Salmon","Canned tuna"],
+  "Turkey mince":     ["Chicken mince","Lamb mince","Quorn mince","Lentils"],
+  "Canned tuna":      ["Canned salmon","Canned mackerel","Sardines","Boiled eggs"],
+  "Sardines (canned)":["Canned mackerel","Canned tuna","Anchovies","Smoked fish"],
+  "Lamb mince":       ["Turkey mince","Chicken mince","Quorn mince","Chickpeas"],
+  "Cod fillet":       ["Tilapia","Haddock","Pollock","Canned tuna"],
+};
+
+const BFAST_ALTS = {
+  "Scrambled eggs + oats + banana + milk":          ["Poached eggs + toast","Boiled eggs + oats","Egg white omelette + yoghurt"],
+  "Boiled eggs + oat porridge + honey":             ["Scrambled eggs + oats","Greek yoghurt + granola","Egg fried rice"],
+  "Omelette (3 eggs) + wholegrain toast + yoghurt": ["Scrambled eggs + oats","Boiled eggs + toast","Poached eggs + yoghurt"],
+  "Omelette + wholegrain toast + yoghurt":          ["Scrambled eggs + oats","Boiled eggs + toast","Poached eggs + yoghurt"],
+  "Omelette + toast + yoghurt":                     ["Scrambled eggs + oats","Boiled eggs + toast","Greek yoghurt + granola"],
+  "Poached eggs + toast + banana":                  ["Scrambled eggs + oats","Boiled eggs + yoghurt","Omelette + toast"],
+  "Poached eggs + toast + banana + yoghurt":        ["Scrambled eggs + oats","Boiled eggs + yoghurt","Omelette + toast"],
+  "Greek yoghurt + granola + banana + milk":        ["Scrambled eggs + oats","Oat porridge + honey","Overnight oats + banana"],
+  "Greek yoghurt + granola + banana":               ["Scrambled eggs + oats","Oat porridge + honey","Overnight oats + banana"],
+  "Greek yoghurt + granola + honey + milk":         ["Scrambled eggs + oats","Oat porridge + honey","Overnight oats + banana"],
+  "Egg fried rice + boiled eggs":                   ["Scrambled eggs + oats","Omelette + toast","Yoghurt + granola"],
+  "Scrambled eggs + oats + apple + milk":           ["Boiled eggs + oats","Poached eggs + toast","Yoghurt + granola"],
+  "Boiled eggs + oat porridge + apple":             ["Scrambled eggs + oats","Greek yoghurt + granola","Egg omelette + toast"],
+  "Scrambled eggs + oats + honey + milk":           ["Boiled eggs + oats","Greek yoghurt + granola","Poached eggs + toast"],
+};
+
+// 4-day gym split: A, B, Rest, C, D, Rest, Rest
+const WKT_A = {
+  key:"A", label:"Push — Chest · Shoulders · Triceps",
+  color:"#185FA5", light:"#E6F1FB",
+  img:"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&fit=crop&q=80",
+  exercises:[
+    { name:"Barbell / DB bench press",   sets:"3 × 10 reps", n:3 },
+    { name:"Overhead press (barbell/DB)","sets":"3 × 10 reps", n:3 },
+    { name:"Incline dumbbell press",      sets:"3 × 12 reps", n:3 },
+    { name:"Lateral raises",              sets:"3 × 15 reps", n:3 },
+    { name:"Tricep pushdowns / dips",     sets:"3 × 12 reps", n:3 },
+    { name:"Plank hold",                  sets:"3 × 30 sec",  n:3 },
+  ]
+};
+const WKT_B = {
+  key:"B", label:"Pull — Back · Biceps",
+  color:"#0F6E56", light:"#E1F5EE",
+  img:"https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=400&fit=crop&q=80",
+  exercises:[
+    { name:"Deadlift",                    sets:"3 × 8 reps",  n:3 },
+    { name:"Lat pulldown / pull-up",      sets:"3 × 10 reps", n:3 },
+    { name:"Seated cable / DB row",       sets:"3 × 12 reps", n:3 },
+    { name:"Face pulls",                  sets:"3 × 15 reps", n:3 },
+    { name:"Barbell / DB bicep curl",     sets:"3 × 12 reps", n:3 },
+    { name:"Hanging knee raise",          sets:"3 × 15 reps", n:3 },
+  ]
+};
+const WKT_C = {
+  key:"C", label:"Legs + Core",
+  color:"#3B6D11", light:"#EAF3DE",
+  img:"https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&fit=crop&q=80",
+  exercises:[
+    { name:"Barbell squat / goblet squat",sets:"3 × 10 reps", n:3 },
+    { name:"Romanian deadlift",           sets:"3 × 10 reps", n:3 },
+    { name:"Leg press",                   sets:"3 × 12 reps", n:3 },
+    { name:"Leg curl",                    sets:"3 × 12 reps", n:3 },
+    { name:"Calf raise",                  sets:"3 × 20 reps", n:3 },
+    { name:"Bicycle crunch",              sets:"3 × 20 reps", n:3 },
+  ]
+};
+const WKT_D = {
+  key:"D", label:"Upper Body — Compound focus",
+  color:"#993556", light:"#FBEAF0",
+  img:"https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&fit=crop&q=80",
+  exercises:[
+    { name:"Pull-up / assisted pull-up",  sets:"4 × 8 reps",  n:4 },
+    { name:"DB shoulder press",           sets:"3 × 12 reps", n:3 },
+    { name:"Cable chest fly",             sets:"3 × 15 reps", n:3 },
+    { name:"Single-arm DB row",           sets:"3 × 12/side",  n:3 },
+    { name:"Hammer curl",                 sets:"3 × 12 reps", n:3 },
+    { name:"Ab wheel / plank rotation",   sets:"3 × 15 reps", n:3 },
+  ]
+};
+const REST = {
+  key:"R", label:"Active Rest & Recovery",
+  color:"#5F5E5A", light:"#F1EFE8",
+  img:null,
+  exercises:[
+    { name:"Brisk walk outdoors",         sets:"20–30 min",   n:1 },
+    { name:"Full body stretch",           sets:"10 min",      n:1 },
+    { name:"Foam roll if available",      sets:"5–10 min",    n:1 },
+    { name:"Sleep 7–8 hours",            sets:"tonight",     n:1 },
+  ]
+};
+
+// 4-day pattern: A B rest C D rest rest
+const PATTERN = [WKT_A, WKT_B, REST, WKT_C, WKT_D, REST, REST];
+const WORKOUTS = Array.from({length:30}, (_,i) => PATTERN[i % 7]);
+
+const WKT_CLASS = { A:'gym-a', B:'gym-b', C:'gym-c', D:'gym-d', R:'rest' };
+const WEEK_COLORS = ['#0F6E56','#185FA5','#BA7517','#993556','#3B6D11'];
+
+// Food images (Unsplash)
+const FOOD_IMGS = {
+  "Scrambled eggs + oats + banana + milk":          "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200&fit=crop&q=80",
+  "Boiled eggs + oat porridge + honey":             "https://images.unsplash.com/photo-1517673132405-a56a2b18a75a?w=200&fit=crop&q=80",
+  "Omelette":                                       "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200&fit=crop&q=80",
+  "Poached eggs + toast + banana":                  "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=200&fit=crop&q=80",
+  "Greek yoghurt + granola + banana + milk":        "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&fit=crop&q=80",
+  "Egg fried rice + boiled eggs":                   "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=200&fit=crop&q=80",
+  "Scrambled eggs + oats + apple + milk":           "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200&fit=crop&q=80",
+  "Boiled eggs + oat porridge + apple":             "https://images.unsplash.com/photo-1517673132405-a56a2b18a75a?w=200&fit=crop&q=80",
+  "Scrambled eggs + oats + honey + milk":           "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200&fit=crop&q=80",
+  "Boiled eggs + oat porridge + banana":            "https://images.unsplash.com/photo-1517673132405-a56a2b18a75a?w=200&fit=crop&q=80",
+  "Greek yoghurt + granola + banana":               "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&fit=crop&q=80",
+  "Greek yoghurt + granola + honey + milk":         "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&fit=crop&q=80",
+  "Chicken breast":   "https://images.unsplash.com/photo-1598103442097-8b74394b95c8?w=200&fit=crop&q=80",
+  "Chicken thighs":   "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=200&fit=crop&q=80",
+  "Salmon fillet":    "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200&fit=crop&q=80",
+  "Mackerel fillet":  "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=200&fit=crop&q=80",
+  "Turkey mince":     "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200&fit=crop&q=80",
+  "Canned tuna":      "https://images.unsplash.com/photo-1584263347416-85a696b4eda7?w=200&fit=crop&q=80",
+  "Sardines (canned)":"https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=200&fit=crop&q=80",
+  "Lamb mince":       "https://images.unsplash.com/photo-1544025162-d76538780b44?w=200&fit=crop&q=80",
+  "Cod fillet":       "https://images.unsplash.com/photo-1519984388953-d2406bc725e1?w=200&fit=crop&q=80",
+};
+
+const BFAST_IMG_KEY = b => {
+  if(b.includes('Omelette')) return 'Omelette';
+  if(b.includes('Poached'))  return 'Poached eggs + toast + banana';
+  if(b.includes('Greek'))    return b.includes('honey') ? 'Greek yoghurt + granola + honey + milk' : (b.includes('milk') ? 'Greek yoghurt + granola + banana + milk' : 'Greek yoghurt + granola + banana');
+  if(b.includes('Egg fried'))return 'Egg fried rice + boiled eggs';
+  if(b.includes('apple'))    return b.includes('Boiled') ? 'Boiled eggs + oat porridge + apple' : 'Scrambled eggs + oats + apple + milk';
+  if(b.includes('honey'))    return b.includes('Boiled') ? 'Boiled eggs + oat porridge + honey' : 'Scrambled eggs + oats + honey + milk';
+  if(b.includes('Boiled') && b.includes('banana')) return 'Boiled eggs + oat porridge + banana';
+  if(b.includes('Boiled'))   return 'Boiled eggs + oat porridge + honey';
+  return 'Scrambled eggs + oats + banana + milk';
+};
+
+// State
+let currentDay = 0;
+const state = JSON.parse(localStorage.getItem('mukundan_tracker') || '{}');
+function saveState() { localStorage.setItem('mukundan_tracker', JSON.stringify(state)); }
+
+// ── BUILD UI ──────────────────────────────────────────────────────────────────
+function buildDayButtons() {
+  const container = document.getElementById('day-buttons');
+  for(let i=0;i<30;i++){
+    const btn = document.createElement('button');
+    btn.className = 'day-btn ' + WKT_CLASS[WORKOUTS[i].key];
+    btn.textContent = i+1;
+    btn.onclick = () => selectDay(i);
+    container.appendChild(btn);
+  }
+}
+
+function selectDay(i) {
+  currentDay = i;
+  document.querySelectorAll('.day-btn').forEach((b,idx) => {
+    b.classList.toggle('active', idx === i);
+  });
+  document.getElementById('overall-progress').style.width = ((i+1)/30*100).toFixed(1)+'%';
+  renderDayCard(i);
+  renderSidebar(i);
+}
+
+function bfastAltKey(b) {
+  if(b.includes('Omelette')) return 'Omelette + toast + yoghurt';
+  if(b.includes('Poached') && b.includes('yoghurt')) return 'Poached eggs + toast + banana + yoghurt';
+  if(b.includes('Poached'))  return 'Poached eggs + toast + banana';
+  if(b.includes('Greek') && b.includes('honey')) return 'Greek yoghurt + granola + honey + milk';
+  if(b.includes('Greek') && b.includes('milk'))  return 'Greek yoghurt + granola + banana + milk';
+  if(b.includes('Greek'))    return 'Greek yoghurt + granola + banana';
+  if(b.includes('Egg fried'))return 'Egg fried rice + boiled eggs';
+  return b;
+}
+
+function mealHTML(id, dot_color, label, time, main, sub, kcal, protein, img_key, alts, is_rice) {
+  const s = state[id] || {};
+  const img = FOOD_IMGS[img_key] || '';
+  const checked = s.done ? 'checked' : '';
+  const altsHtml = (alts||[]).map(a=>`<span class="alt-chip">${a}</span>`).join('');
+  const riceTag = is_rice ? `<span class="macro-pill" style="background:#EAF3DE;color:#3B6D11;">+ rice</span>` : '';
+  return `
+  <div class="meal-block">
+    <div class="meal-header">
+      <div class="meal-dot" style="background:${dot_color}"></div>
+      <span class="meal-title-text" style="color:${dot_color}">${label}</span>
+      <span class="meal-time-badge">${time}</span>
+    </div>
+    <div class="meal-card-inner">
+      ${img ? `<img class="meal-img" src="${img}" alt="${main}" onerror="this.style.display='none'">` : `<div class="meal-img-placeholder" style="background:${dot_color}20;color:${dot_color};font-size:11px;padding:8px;text-align:center;">${main.substring(0,12)}</div>`}
+      <div class="meal-info">
+        <div class="meal-main-food">${main}</div>
+        <div class="meal-sub-food">${sub}</div>
+        <div class="meal-macros">
+          <span class="macro-pill" style="background:#FAEEDA;color:#BA7517;">${kcal} kcal</span>
+          <span class="macro-pill" style="background:#E6F1FB;color:#185FA5;">${protein}g protein</span>
+          ${riceTag}
+        </div>
+        <div class="meal-checkbox-row">
+          <label class="check-wrap">
+            <input type="checkbox" ${checked} onchange="toggleMeal('${id}',this.checked)">
+            <span id="lbl-${id}" class="${s.done?'done':''}">Mark as eaten</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    ${alts && alts.length ? `
+    <div class="alts-section" style="margin-top:6px;">
+      <div class="alts-label">Alternatives if unavailable:</div>
+      <div class="alt-chips">${altsHtml}</div>
+    </div>` : ''}
+  </div>`;
+}
+
+function toggleMeal(id, done) {
+  if(!state[id]) state[id] = {};
+  state[id].done = done;
+  document.getElementById('lbl-'+id).className = done ? 'done' : '';
+  saveState();
+}
+
+function toggleWater(dayIdx, dropIdx) {
+  const k = `w_${dayIdx}`;
+  if(!state[k]) state[k] = 0;
+  const cur = state[k];
+  state[k] = dropIdx < cur ? dropIdx : dropIdx + 1;
+  saveState();
+  renderWater(dayIdx);
+}
+
+function renderWater(dayIdx) {
+  const filled = state[`w_${dayIdx}`] || 0;
+  const ml = filled * 500;
+  document.getElementById('water-drops').innerHTML = Array.from({length:6},(_,i)=>`<div class="drop ${i<filled?'filled':''}" onclick="toggleWater(${dayIdx},${i})" title="${(i+1)*500}ml"></div>`).join('');
+  document.getElementById('water-ml').textContent = `${ml}ml / 3000ml`;
+}
+
+function renderDayCard(i) {
+  const d = DAYS_DATA[i];
+  const wkt = WORKOUTS[i];
+  const weekNum = Math.floor(i/7)+1;
+  const wc = WEEK_COLORS[weekNum-1] || WEEK_COLORS[0];
+  const lSide = RICE_SIDE[d.lp] || 'Basmati rice 100g + veg';
+  const dSide = RICE_SIDE[d.dp] || 'Basmati rice 100g + veg';
+  const bAltKey = bfastAltKey(d.b);
+  const bAlts = BFAST_ALTS[bAltKey] || BFAST_ALTS[d.b] || ["Omelette + toast","Yoghurt + granola","Boiled eggs + oats"];
+  const imgKey = BFAST_IMG_KEY(d.b);
+
+  document.getElementById('day-card').innerHTML = `
+  <div class="day-card-header">
+    <div class="day-number" style="background:${wc}">
+      <div class="num">${i+1}</div>
+      <div class="lbl">DAY</div>
+    </div>
+    <div class="day-title">
+      <h2>Week ${weekNum} · ${wkt.label}</h2>
+      <p>No beef · No pork · Rice at lunch & dinner</p>
+    </div>
+    <div class="week-badge" style="background:${wc}20;color:${wc};">Week ${weekNum}</div>
+  </div>
+
+  <div class="section-tabs">
+    <div class="tab active" onclick="switchTab('diet',this)">Diet plan</div>
+    <div class="tab" onclick="switchTab('check',this)">Check-in</div>
+  </div>
+
+  <div class="tab-content active" id="tab-diet">
+    ${mealHTML(`b_${i}`,'#BA7517','Breakfast','7–9 AM', d.b.split('+')[0].trim(), d.b.split('+').slice(1).join('+').trim() || 'milk · oats', 780, 50, imgKey, bAlts, false)}
+    ${mealHTML(`l_${i}`,'#3B6D11','Lunch · Rice meal 1','12–1 PM', d.lp, lSide, 720, 50, d.lp, FOOD_ALTS[d.lp]||[], true)}
+    ${mealHTML(`d_${i}`,'#185FA5','Dinner · Rice meal 2','6–8 PM', d.dp, dSide, 820, 52, d.dp, FOOD_ALTS[d.dp]||[], true)}
+  </div>
+
+  <div class="tab-content" id="tab-check">
+    <div class="water-section">
+      <div class="water-label">Water intake</div>
+      <div class="water-drops" id="water-drops"></div>
+      <div class="water-ml" id="water-ml">0ml / 3000ml</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-label">Notes / today's weight</div>
+      <textarea class="notes-input" rows="3" placeholder="e.g. weight: 58.5kg · felt strong today · slept 7hrs" 
+        onchange="saveNote(${i},this.value)">${state[`note_${i}`]||''}</textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+      <div style="background:var(--teal-l);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--teal);" id="meals-done-count">0/3</div>
+        <div style="font-size:11px;color:var(--gray);">meals done</div>
+      </div>
+      <div style="background:var(--blue-l);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--blue);" id="water-done-count">0/6</div>
+        <div style="font-size:11px;color:var(--gray);">water bottles</div>
+      </div>
+    </div>
+  </div>`;
+
+  renderWater(i);
+  updateCounts(i);
+}
+
+function updateCounts(i) {
+  const meals = ['b','l','d'].filter(m => state[`${m}_${i}`]?.done).length;
+  const water = state[`w_${i}`] || 0;
+  const mc = document.getElementById('meals-done-count');
+  const wc2 = document.getElementById('water-done-count');
+  if(mc) mc.textContent = `${meals}/3`;
+  if(wc2) wc2.textContent = `${water}/6`;
+}
+
+function saveNote(i, val) { state[`note_${i}`] = val; saveState(); }
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+function renderSidebar(i) {
+  const wkt = WORKOUTS[i];
+  const weekNum = Math.floor(i/7)+1;
+
+  // Exercise card
+  const exItems = wkt.exercises.map((ex, ei) => {
+    const checks = Array.from({length: ex.n < 4 ? ex.n : 3}, (_,ci) => {
+      const k = `ex_${i}_${ei}_${ci}`;
+      const done = state[k] ? 'done' : '';
+      return `<div class="ex-check ${done}" onclick="toggleSet('${k}',this)"></div>`;
+    }).join('');
+    return `
+    <div class="ex-item">
+      <div class="ex-num" style="background:${wkt.color}">${ei+1}</div>
+      <div class="ex-text">
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-sets">${ex.sets}</div>
+      </div>
+      <div class="ex-checks">${checks}</div>
+    </div>`;
+  }).join('');
+
+  const imgHtml = wkt.img
+    ? `<img class="ex-img" src="${wkt.img}" alt="${wkt.label}" onerror="this.style.display='none'">`
+    : `<div class="ex-img-placeholder" style="background:${wkt.color};">Active rest day</div>`;
+
+  // Mini calendar
+  const calDays = Array.from({length:30},(_,j)=>{
+    const w = WORKOUTS[j];
+    const cls = `cal-day ${WKT_CLASS[w.key]} ${j===i?'cur':''}`;
+    return `<div class="${cls}" onclick="selectDay(${j})">${j+1}</div>`;
+  }).join('');
+
+  // Progress
+  const totalMeals = Array.from({length:i+1},(_,j)=>['b','l','d'].filter(m=>state[`${m}_${j}`]?.done).length).reduce((a,b)=>a+b,0);
+  const totalWater = Array.from({length:i+1},(_,j)=>state[`w_${j}`]||0).reduce((a,b)=>a+b,0);
+  const gymDays = Array.from({length:i+1},(_,j)=>WORKOUTS[j].key!=='R'?1:0).reduce((a,b)=>a+b,0);
+
+  document.getElementById('sidebar').innerHTML = `
+  <div class="ex-card">
+    <div class="ex-card-header">
+      <div class="ex-type-badge" style="background:${wkt.color}">${wkt.key}</div>
+      <div class="ex-header-text">
+        <h3>${wkt.label}</h3>
+        <p>Day ${i+1} · Week ${weekNum} · ${wkt.exercises.length} exercises</p>
+      </div>
+    </div>
+    ${imgHtml}
+    <div class="ex-list">${exItems}</div>
+  </div>
+
+  <div class="mini-cal">
+    <h3>Month overview</h3>
+    <div class="cal-grid">
+      <div class="cal-day-lbl">M</div><div class="cal-day-lbl">T</div><div class="cal-day-lbl">W</div>
+      <div class="cal-day-lbl">T</div><div class="cal-day-lbl">F</div><div class="cal-day-lbl">S</div><div class="cal-day-lbl">S</div>
+      ${calDays}
+    </div>
+    <div class="cal-legend">
+      <div class="cal-leg"><div class="cal-dot" style="background:#E6F1FB;border:1px solid #185FA5;"></div>Push (A)</div>
+      <div class="cal-leg"><div class="cal-dot" style="background:var(--teal-l);border:1px solid var(--teal);"></div>Pull (B)</div>
+      <div class="cal-leg"><div class="cal-dot" style="background:var(--green-l);border:1px solid var(--green);"></div>Legs (C)</div>
+      <div class="cal-leg"><div class="cal-dot" style="background:var(--pink-l);border:1px solid var(--pink);"></div>Upper (D)</div>
+      <div class="cal-leg"><div class="cal-dot" style="background:var(--gray-l);border:1px solid var(--gray-m);"></div>Rest</div>
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <h3>Progress so far</h3>
+    <div class="prog-row">
+      <div class="prog-lbl">Meals eaten</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100,(totalMeals/((i+1)*3)*100)).toFixed(0)}%;background:var(--amber);"></div></div>
+      <div class="prog-pct" style="color:var(--amber);">${totalMeals}/${(i+1)*3}</div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-lbl">Water targets</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100,(totalWater/((i+1)*6)*100)).toFixed(0)}%;background:var(--blue);"></div></div>
+      <div class="prog-pct" style="color:var(--blue);">${totalWater}/${(i+1)*6}</div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-lbl">Gym days</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100,(gymDays/Math.ceil((i+1)*4/7)*100)).toFixed(0)}%;background:var(--teal);"></div></div>
+      <div class="prog-pct" style="color:var(--teal);">${gymDays}</div>
+    </div>
+  </div>
+
+  <div class="alts-card">
+    <h3>Protein alternatives</h3>
+    <p>Tap any swap below if your main food isn't available today.</p>
+    <div style="margin-top:10px;">
+      ${Object.entries(FOOD_ALTS).map(([food, alts])=>`
+      <div class="alt-row">
+        <img class="alt-icon" src="${FOOD_IMGS[food]||''}" alt="${food}" onerror="this.style.display='none'">
+        <div class="alt-info">
+          <div class="name">${food}</div>
+          <div class="macro">${alts.slice(0,2).join(' · ')}</div>
+        </div>
+        <div class="alt-badge" style="background:var(--teal-l);color:var(--teal);">swap</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function toggleSet(k, el) {
+  state[k] = !state[k];
+  el.classList.toggle('done', state[k]);
+  saveState();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+buildDayButtons();
+selectDay(0);
+</script>
+</body>
+</html>
